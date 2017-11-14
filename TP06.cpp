@@ -7,7 +7,8 @@ using namespace std;
 
 
 struct student {
-	string name;
+	string firstname;
+	string lastname;
 	string usfid;
 	string email;
 	int presentation_grade;
@@ -15,10 +16,12 @@ struct student {
 	int project_grade;
 };
 
-int getUser(string search_term, vector<student> students) {
+vector<student> students;
+
+int getUser(string search_term) {
 	int index = 0;
 	for (vector<student>::iterator it = students.begin(); it != students.end(); ++it) {
-		if ((*it).name == search_term || (*it).usfid == search_term || (*it).email == search_term) {
+		if ((*it).firstname + " " + (*it).lastname == search_term || (*it).usfid == search_term || (*it).email == search_term) {
 			return index;
 		}
 		++index;
@@ -26,7 +29,7 @@ int getUser(string search_term, vector<student> students) {
 	return -1;
 }
 
-bool idExists(string search_term, vector<student> students) {
+bool idExists(string search_term) {
 	for (vector<student>::iterator it = students.begin(); it != students.end(); ++it) {
 		if ((*it).usfid == search_term) {
 			return true;
@@ -35,7 +38,7 @@ bool idExists(string search_term, vector<student> students) {
 	return false;
 }
 
-bool emailExists(string search_term, vector<student> students) {
+bool emailExists(string search_term) {
 	for (vector<student>::iterator it = students.begin(); it != students.end(); ++it) {
 		if ((*it).email == search_term) {
 			return true;
@@ -45,11 +48,11 @@ bool emailExists(string search_term, vector<student> students) {
 }
 
 
-void displayStudents(vector<student> students)
+void displayStudents()
 {
 	cout << "Student Name\t\tUSF ID\t\tEmail\t\t\t\tPresentation Grade\t\tEssay Grade\t\tProject Grade\n";
 	for (vector<student>::iterator it = students.begin(); it != students.end(); ++it) {
-		cout << (*it).name << "\t\t" << (*it).usfid << "\t" << (*it).email << "\t\t";
+		cout << (*it).firstname + " " + (*it).lastname << "\t\t" << (*it).usfid << "\t" << (*it).email << "\t\t";
 
 		if ((*it).presentation_grade == -1) {
 			cout << "N/a\t\t\t\t";
@@ -95,7 +98,7 @@ int DisplayStudentsFromFile(string filename) {
 	return 0;
 }
 
-int loadStudentsFromFile(string filename, vector<student>& students) {
+int loadStudentsFromFile(string filename) {
 	ifstream inFile(filename.c_str());
 	if (inFile.fail())
 	{
@@ -106,7 +109,8 @@ int loadStudentsFromFile(string filename, vector<student>& students) {
 	int pres_grade, essay_grade, proj_grade;
 	student n;
 	while (inFile >> firstname >> lastname >> usfid >> email >> pres_grade >> essay_grade >> proj_grade) {
-		n.name = firstname;
+		n.firstname = firstname;
+		n.lastname = lastname;
 		n.usfid = usfid;
 		n.email = email;
 		n.presentation_grade = pres_grade;
@@ -118,7 +122,7 @@ int loadStudentsFromFile(string filename, vector<student>& students) {
 	return 0;
 }
 
-int saveStudentsToFile(string filename, vector<student> &students) {
+int saveStudentsToFile(string filename) {
 	ofstream outFile(filename.c_str());
 	if (outFile.fail())
 	{
@@ -127,7 +131,7 @@ int saveStudentsToFile(string filename, vector<student> &students) {
 	}
 
 	for (vector<student>::iterator it = students.begin(); it != students.end(); ++it) {
-		outFile << (*it).name << " ";
+		outFile << (*it).firstname + " " + (*it).lastname << " ";
 		outFile << (*it).usfid << " ";
 		outFile << (*it).email << " ";
 		outFile << (*it).presentation_grade << " ";
@@ -142,15 +146,21 @@ int saveStudentsToFile(string filename, vector<student> &students) {
 
 }
 
-void addStudent(vector<student> students) {
-	string name, usfid, email;
+void addStudent() {
+	string firstname, lastname, usfid, email;
 	cin.ignore();
 	cout << "Enter Student First Name:\n";
-	getline(cin, name);
+	getline(cin, firstname);
+	cout << "Enter Student Last Name:\n";
+	getline(cin, lastname);
 
-	while (name.size() > 40) {
+
+	while (firstname.size() + lastname.size() > 40) {
 		cout << "Name cannot exceed 40 characters, Enter a different Student Name:\n";
-		getline(cin, name);
+		cout << "Enter Student First Name:\n";
+		getline(cin, firstname);
+		cout << "Enter Student Last Name:\n";
+		getline(cin, lastname);
 	}
 
 	cout << "Enter Student USF ID:\n";
@@ -159,7 +169,7 @@ void addStudent(vector<student> students) {
 		cout << "ID must be 10 characters long, Enter a different Student USF ID:\n";
 		getline(cin, usfid);
 	}
-	while (idExists(usfid, students)) {
+	while (idExists(usfid)) {
 		cout << "ID already exists, Enter a different Student USF ID:\n";
 		getline(cin, usfid);
 	}
@@ -170,7 +180,7 @@ void addStudent(vector<student> students) {
 		cout << "E-mail cannot exceed 40 characters, Enter a different Student Name:\n";
 		getline(cin, email);
 	}
-	while (emailExists(email, students)) {
+	while (emailExists(email)) {
 		cout << "E-mail already exists, Enter a different Student Email:\n";
 		getline(cin, email);
 	}
@@ -199,10 +209,11 @@ void addStudent(vector<student> students) {
 		cout << "Grade must be between 0 and 4, Enter Project Grade (0-4):\n";
 		cin >> project_grade_;
 	}
-	cout << "Successfuly added student \"" << name << "\"\n\n";
+	cout << "Successfuly added student \"" << firstname + " " + lastname << "\"\n\n";
 
 	student n;
-	n.name = name;
+	n.firstname = firstname;
+	n.lastname = lastname;
 	n.usfid = usfid;
 	n.email = email;
 	n.presentation_grade = presentation_grade_;
@@ -214,13 +225,13 @@ void addStudent(vector<student> students) {
 	cout << "\nIMPORATNT: Save to see changes\n\n";
 }
 
-void removeStudent(vector<student>&students) {
+void removeStudent() {
 	string search_term;
 	cin.ignore();
 	cout << "Enter Student Name, USF ID, or Email:\n";
 	getline(cin, search_term);
 
-	int s = getUser(search_term, students);
+	int s = getUser(search_term);
 	if (s == -1) {
 		cout << "No student found. Type \"list\" to view all students\n";
 	}
@@ -230,13 +241,13 @@ void removeStudent(vector<student>&students) {
 	}
 }
 
-void editStudent(vector<student>&students) {
+void editStudent() {
 
 	string search_term;
 	cin.ignore();
 	cout << "Enter Student Name, USF ID, or Email:\n";
 	getline(cin, search_term);
-	int s = getUser(search_term, students);
+	int s = getUser(search_term);
 
 	if (s == -1) {
 		cout << "No student found. Type \"list\" to view all students\n";
@@ -244,9 +255,9 @@ void editStudent(vector<student>&students) {
 	else {
 		student *c = &students[s];
 		string name, firstname, lastname, usfid, email;
-		int presentation_grade, essay_grade, project_grade;
-
-		cout << "Start editing student: " << c->name << endl;
+		string presentation_grade_, project_grade_, essay_grade_;
+		int presentation_grade, project_grade, essay_grade;
+		cout << "Start editing student: " << c->firstname + " " + c->lastname << endl;
 
 		cout << "\nEnter Student First Name (Press enter to skip):\n";
 		getline(cin, firstname);
@@ -258,31 +269,69 @@ void editStudent(vector<student>&students) {
 		getline(cin, email);
 
 		cout << "Enter Presentation Grade (Press enter to skip):\n";
-		cin >> presentation_grade;
-		while (presentation_grade < 0 || presentation_grade > 4) {
-			cout << "Grade must be between 0 and 4, Enter Presentation Grade (0-4):\n";
-			cin >> presentation_grade;
+		getline(cin, presentation_grade_);
+
+
+		if (presentation_grade_ != "") { //check for blank
+			presentation_grade = stoi(presentation_grade_);
+
+			while (presentation_grade < 0 || presentation_grade > 4) {
+				cout << "Grade must be between 0 and 4, Enter Presentation Grade (0-4):\n";
+				getline(cin, presentation_grade_);
+				presentation_grade = stoi(presentation_grade_);
+			}
+			(*c).presentation_grade = presentation_grade;
 		}
-		(*c).presentation_grade = presentation_grade;
+
 
 		cout << "Enter Essay Grade (Press enter to skip):\n";
-		cin >> essay_grade;
-		while (essay_grade < 0 || essay_grade > 4) {
-			cout << "Grade must be between 0 and 4, Enter Presentation Grade (0-4):\n";
-			cin >> essay_grade;
+		getline(cin, essay_grade_);
+
+
+		if (essay_grade_ != "") {
+			essay_grade = stoi(essay_grade_);
+
+			while (essay_grade < 0 || essay_grade > 4) {
+				cout << "Grade must be between 0 and 4, Enter Presentation Grade (0-4):\n";
+				getline(cin, essay_grade_);
+				essay_grade = stoi(essay_grade_);
+			}
+			(*c).essay_grade = essay_grade;
+
+
 		}
-		(*c).essay_grade = essay_grade;
+
 
 		cout << "Enter Project Grade (Press enter to skip):\n";
-		cin >> project_grade;
-		while (project_grade < 0 || project_grade > 4) {
-			cout << "Grade must be between 0 and 4, Enter Presentation Grade (0-4):\n";
-			cin >> project_grade;
-		}
-		(*c).project_grade = project_grade;
+		getline(cin, project_grade_);
 
-		if (name != "") {
-			(*c).name = name;
+
+		if (project_grade_ != "") {
+			project_grade = stoi(project_grade_);
+
+			while (project_grade < 0 || project_grade > 4) {
+				cout << "Grade must be between 0 and 4, Enter Presentation Grade (0-4):\n";
+				getline(cin, project_grade_);
+				project_grade = stoi(project_grade_);
+			}
+			(*c).project_grade = project_grade;
+
+		}
+
+
+
+		if (firstname == "" && lastname == "") {
+			;
+		}
+		else if (firstname == "" && lastname != "") {
+			(*c).lastname = lastname;
+		}
+		else if (firstname != "" && lastname == "") {
+			(*c).firstname = firstname;
+		}
+		else if (firstname != "" && lastname != "") {
+			(*c).firstname = firstname;
+			(*c).lastname = lastname;
 		}
 
 		if (usfid != "") {
@@ -300,7 +349,7 @@ void editStudent(vector<student>&students) {
 int main() {
 	cout << "Starting Class Roll System\n";
 	cout << "Loading Class Data from File\n";
-	vector<student> students;
+
 	string filename;
 
 	cout << "Enter the file name of the student database " << endl;
@@ -308,7 +357,7 @@ int main() {
 	cout << endl << endl;
 
 	DisplayStudentsFromFile(filename);
-	if (loadStudentsFromFile(filename, students) == 1) {
+	if (loadStudentsFromFile(filename) == 1) {
 		return 1;
 	}
 	cout << "Loading Class Data Complete\n";
@@ -322,34 +371,34 @@ int main() {
 		cout << "5. List\n";
 		cout << "6. Save\n";
 		cout << "7. Exit\n";
-		cout << "8. Help\n\n";
+		//cout << "8. Help\n\n";
 
 		string command;
 		std::cout << "command > " << command;
 		cin >> command;
 
 		if (command == "add") {
-			addStudent(students);
+			addStudent();
 		}
 		else if (command == "remove") {
-			removeStudent(students);
+			removeStudent();
 		}
 		else if (command == "edit") {
-			editStudent(students);
+			editStudent();
 		}
 		else if (command == "list")
 		{
-			displayStudents(students);
+			displayStudents();
 		}
 		else if (command == "save")
 		{
-			if (saveStudentsToFile(filename, students) == 1) {
+			if (saveStudentsToFile(filename) == 1) {
 				cout << "There was an error saving the file" << endl;
 			}
 		}
 		else if (command == "exit")
 		{
-			if (saveStudentsToFile(filename, students) == 1) {
+			if (saveStudentsToFile(filename) == 1) {
 				cout << "There was an error saving the file" << endl;
 			}
 			break;
