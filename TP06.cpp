@@ -368,35 +368,37 @@ int main() {
 		cout << "1. Add\n";
 		cout << "2. Remove\n";
 		cout << "3. Edit\n";
-		cout << "5. List\n";
-		cout << "6. Save\n";
-		cout << "7. Exit\n";
+		cout << "4. List\n";
+		cout << "5. Save\n";
+		cout << "6. Exit\n";
 		//cout << "8. Help\n\n";
 
 		string command;
 		std::cout << "command > " << command;
 		cin >> command;
 
-		if (command == "add") {
+		transform(command.begin(), command.end(), command.begin(), ::tolower);
+
+		if (command == "add" || command == "1") {
 			addStudent();
 		}
-		else if (command == "remove") {
+		else if (command == "remove" || command == "2") {
 			removeStudent();
 		}
-		else if (command == "edit") {
+		else if (command == "edit" || command == "3") {
 			editStudent();
 		}
-		else if (command == "list")
+		else if (command == "list" || command == "4")
 		{
 			displayStudents();
 		}
-		else if (command == "save")
+		else if (command == "save" || command == "5")
 		{
 			if (saveStudentsToFile(filename) == 1) {
 				cout << "There was an error saving the file" << endl;
 			}
 		}
-		else if (command == "exit")
+		else if (command == "exit" || command == "6")
 		{
 			if (saveStudentsToFile(filename) == 1) {
 				cout << "There was an error saving the file" << endl;
